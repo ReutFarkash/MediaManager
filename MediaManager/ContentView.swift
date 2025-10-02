@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  MediaManager
-//
-//  Created by Reut Farkash on 01/10/2025.
-//
-
 import SwiftUI
 import CoreData
 
@@ -18,7 +11,6 @@ struct ContentView: View {
 
     @State private var showingAddItem = false
     @State private var importInProgress = false
-    @State private var selectedItem: Item?
 
     var body: some View {
         NavigationView {
@@ -43,49 +35,82 @@ struct ContentView: View {
                 .onDelete(perform: deleteItems)
             }
             .toolbar {
-                ToolbarItem {
+                ToolbarItem(placement: .automatic) {
                     Button(action: { showingAddItem = true }) {
                         Label("Add Item", systemImage: "plus")
                     }
+                    .accessibilityIdentifier("Add Item")
                 }
-                ToolbarItem {
+                ToolbarItem(placement: .automatic) {
                     Button(action: importBooks) {
                         Label("Import from Apple Books", systemImage: "book")
-                    }.disabled(importInProgress)
+                    }
+                    .accessibilityIdentifier("Import from Apple Books")
+                    .disabled(importInProgress)
                 }
             }
             .sheet(isPresented: $showingAddItem) {
                 AddItemView { newItem in
-                    withAnimation {
-                        viewContext.insert(newItem)
-                        do { try viewContext.save() } catch { print(error) }
+                    // The onSave closure from AddItemView provides the new item.
+                    // It's already in the viewContext, so we just need to save.
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print("Error saving new item: \(error.localizedDescription)")
                     }
                 }
             }
-            Text("Select an item")
+            Text("Select an item") // Placeholder for split view display
         }
     }
 
     private func importBooks() {
         importInProgress = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let books = BooksImporter.fetchBooks()
-            DispatchQueue.main.async {
+        Task {
+            let books = await BooksImporter.fetchBooks()
+            await MainActor.run {
+                // 1. Fetch existing book identifiers once for efficient checking.
+                let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "mediaType == 'Book'")
+                fetchRequest.propertiesToFetch = ["title", "descriptionText"]
+                
+                let existingBookKeys: Set<String>
+                do {
+                    let currentItems = try viewContext.fetch(fetchRequest)
+                    existingBookKeys = Set(currentItems.compactMap {
+                        guard let title = $0.title, let author = $0.descriptionText else { return nil }
+                        // Create a unique key for each book.
+                        return "\(title)|\(author)"
+                    })
+                } catch {
+                    print("Error fetching existing items: \(error.localizedDescription)")
+                    importInProgress = false
+                    return
+                }
+
+                var hasNewItems = false
                 for book in books {
-                    // Check if book already exists (by title and author)
-                    let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
-                    fetchRequest.predicate = NSPredicate(format: "title == %@ AND descriptionText == %@", book.title, book.author)
-                    let existing = (try? viewContext.fetch(fetchRequest)) ?? []
-                    if existing.isEmpty {
+                    // 2. Check against the in-memory set, which is much faster.
+                    let bookKey = "\(book.title)|\(book.author)"
+                    if !existingBookKeys.contains(bookKey) {
                         let newItem = Item(context: viewContext)
                         newItem.title = book.title
                         newItem.descriptionText = book.author
                         newItem.mediaType = "Book"
                         newItem.isInApp = true
                         newItem.timestamp = Date()
+                        hasNewItems = true
                     }
                 }
-                do { try viewContext.save() } catch { print(error) }
+
+                // 3. Save only if new items were actually added.
+                if hasNewItems {
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print("Error saving imported books: \(error.localizedDescription)")
+                    }
+                }
                 importInProgress = false
             }
         }
@@ -94,90 +119,14 @@ struct ContentView: View {
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             offsets.map { items[$0] }.forEach(viewContext.delete)
-            do { try viewContext.save() } catch { let nsError = error as NSError; fatalError("Unresolved error \(nsError), \(nsError.userInfo)") }
-        }
-    }
-}
-
-struct AddItemView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var title = ""
-    @State private var descriptionText = ""
-    @State private var mediaType = ""
-    @State private var url = ""
-    @State private var favorite = false
-    @State private var isDownloading = false
-    @State private var isOnMac = false
-    @State private var isOnIPhone = false
-    @State private var isInApp = false
-    var onSave: (Item) -> Void
-    @Environment(\.managedObjectContext) private var viewContext
-
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Title", text: $title)
-                TextField("Description", text: $descriptionText)
-                TextField("Media Type", text: $mediaType)
-                TextField("URL", text: $url)
-                Toggle("Favorite", isOn: $favorite)
-                Toggle("Downloading", isOn: $isDownloading)
-                Toggle("Available on Mac", isOn: $isOnMac)
-                Toggle("Available on iPhone", isOn: $isOnIPhone)
-                Toggle("In App (e.g. Apple Books)", isOn: $isInApp)
-            }
-            .navigationTitle("Add Item")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { presentationMode.wrappedValue.dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        let newItem = Item(context: viewContext)
-                        newItem.title = title
-                        newItem.descriptionText = descriptionText
-                        newItem.mediaType = mediaType
-                        newItem.url = url
-                        newItem.favorite = favorite
-                        newItem.isDownloading = isDownloading
-                        newItem.isOnMac = isOnMac
-                        newItem.isOnIPhone = isOnIPhone
-                        newItem.isInApp = isInApp
-                        newItem.timestamp = Date()
-                        onSave(newItem)
-                        presentationMode.wrappedValue.dismiss()
-                    }.disabled(title.isEmpty)
-                }
+            do {
+                try viewContext.save()
+            } catch {
+                // Avoid fatalError in production code. Log the error for diagnostics.
+                // You might want to show an alert to the user here.
+                let nsError = error as NSError
+                print("Unresolved error deleting item: \(nsError), \(nsError.userInfo)")
             }
         }
     }
-}
-
-struct ItemDetailView: View {
-    @ObservedObject var item: Item
-    var body: some View {
-        Form {
-            Text("Title: \(item.title ?? "")")
-            Text("Description: \(item.descriptionText ?? "")")
-            Text("Media Type: \(item.mediaType ?? "")")
-            Text("URL: \(item.url ?? "")")
-            Toggle("Favorite", isOn: Binding(get: { item.favorite }, set: { item.favorite = $0 }))
-            Toggle("Downloading", isOn: Binding(get: { item.isDownloading }, set: { item.isDownloading = $0 }))
-            Toggle("Available on Mac", isOn: Binding(get: { item.isOnMac }, set: { item.isOnMac = $0 }))
-            Toggle("Available on iPhone", isOn: Binding(get: { item.isOnIPhone }, set: { item.isOnIPhone = $0 }))
-            Toggle("In App (e.g. Apple Books)", isOn: Binding(get: { item.isInApp }, set: { item.isInApp = $0 }))
-        }
-        .navigationTitle(item.title ?? "Item")
-    }
-}
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

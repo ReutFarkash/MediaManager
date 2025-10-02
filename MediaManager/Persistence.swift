@@ -14,17 +14,25 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
+        for i in 0..<10 {
             let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            newItem.timestamp = Date().addingTimeInterval(TimeInterval(i * 100))
+            newItem.title = "Sample Item \(i + 1)"
+            newItem.descriptionText = "This is a description for sample item number \(i + 1)."
+            newItem.mediaType = ["Book", "Movie", "Podcast", "Document"].randomElement()
+            newItem.url = i % 3 == 0 ? "https://www.apple.com" : nil
+            newItem.favorite = i % 2 == 0
+            newItem.isDownloading = i % 4 == 0
+            newItem.isOnMac = i % 2 == 1
+            newItem.isOnIPhone = i % 3 == 1
+            newItem.isInApp = i % 5 == 0
         }
         do {
             try viewContext.save()
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            // In previews/tests, fatalError is acceptable for unrecoverable setup errors.
             let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            fatalError("Unresolved error during preview data setup: \(nsError), \(nsError.userInfo)")
         }
         return result
     }()
@@ -34,24 +42,19 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "MediaManager")
         if inMemory {
+            // For in-memory stores, assign a null URL
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                // In a shipping application, this should be handled more gracefully, e.g.,
+                // logging the error and presenting a user-friendly message, rather than crashing.
+                fatalError("Unresolved error loading persistent stores: \(error), \(error.userInfo)")
             }
         })
+        // Automatically merge changes from parent contexts (e.g., background saves)
         container.viewContext.automaticallyMergesChangesFromParent = true
+        // Optional: Set merge policy for better conflict resolution
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
 }

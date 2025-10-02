@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4888F56D2E8EDA56007B6218 /* ItemFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4888F56C2E8EDA56007B6218 /* ItemFormView.swift */; };
+		48F752A32E8EC4C1004101D2 /* MediaManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		487F4A012E8D863F0010714F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		487F49EE2E8D863D0010714F /* MediaManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MediaManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		487F4A002E8D863F0010714F /* MediaManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediaManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		487F4A0A2E8D863F0010714F /* MediaManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediaManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4888F56C2E8EDA56007B6218 /* ItemFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemFormView.swift; sourceTree = "<group>"; };
+		48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +86,8 @@
 				487F4A032E8D863F0010714F /* MediaManagerTests */,
 				487F4A0D2E8D863F0010714F /* MediaManagerUITests */,
 				487F49EF2E8D863D0010714F /* Products */,
+				48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */,
+				4888F56C2E8EDA56007B6218 /* ItemFormView.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -236,6 +245,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4888F56D2E8EDA56007B6218 /* ItemFormView.swift in Sources */,
+				48F752A32E8EC4C1004101D2 /* MediaManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
