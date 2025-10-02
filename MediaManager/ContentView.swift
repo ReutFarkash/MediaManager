@@ -17,6 +17,7 @@ struct ContentView: View {
     private var items: FetchedResults<Item>
 
     @State private var showingAddItem = false
+    @State private var importInProgress = false
     @State private var selectedItem: Item?
 
     var body: some View {
@@ -47,6 +48,11 @@ struct ContentView: View {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
+                ToolbarItem {
+                    Button(action: importBooks) {
+                        Label("Import from Apple Books", systemImage: "book")
+                    }.disabled(importInProgress)
+                }
             }
             .sheet(isPresented: $showingAddItem) {
                 AddItemView { newItem in
@@ -57,6 +63,31 @@ struct ContentView: View {
                 }
             }
             Text("Select an item")
+        }
+    }
+
+    private func importBooks() {
+        importInProgress = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let books = BooksImporter.fetchBooks()
+            DispatchQueue.main.async {
+                for book in books {
+                    // Check if book already exists (by title and author)
+                    let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+                    fetchRequest.predicate = NSPredicate(format: "title == %@ AND descriptionText == %@", book.title, book.author)
+                    let existing = (try? viewContext.fetch(fetchRequest)) ?? []
+                    if existing.isEmpty {
+                        let newItem = Item(context: viewContext)
+                        newItem.title = book.title
+                        newItem.descriptionText = book.author
+                        newItem.mediaType = "Book"
+                        newItem.isInApp = true
+                        newItem.timestamp = Date()
+                    }
+                }
+                do { try viewContext.save() } catch { print(error) }
+                importInProgress = false
+            }
         }
     }
 
