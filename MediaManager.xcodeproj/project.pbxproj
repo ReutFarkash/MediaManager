@@ -108,7 +108,7 @@
 				487F49EA2E8D863D0010714F /* Sources */,
 				487F49EB2E8D863D0010714F /* Frameworks */,
 				487F49EC2E8D863D0010714F /* Resources */,
-				48F752A42E8EC4C1004101D3 /* Remove Testing.framework */,
+
 			);
 			buildRules = (
 			);
@@ -212,21 +212,7 @@
 						);		};
 /* End PBXProject section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		48F752A42E8EC4C1004101D3 /* Remove Testing.framework */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "rm -rf \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Testing.framework\"";
-		};
-/* End PBXShellScriptBuildPhase section */
+
 
 /* Begin PBXResourcesBuildPhase section */
 		487F49EC2E8D863D0010714F /* Resources */ = {

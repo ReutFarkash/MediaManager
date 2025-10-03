@@ -8,12 +8,12 @@ struct ItemDetailView: View {
 
     var body: some View {
         Form {
-            TextField("Title", text: Binding(get: { item.title ?? "" }, set: { item.title = $0; saveChanges() }))
-            TextField("Description", text: Binding(get: { item.descriptionText ?? "" }, set: { item.descriptionText = $0; saveChanges() }))
-            TextField("Media Type", text: Binding(get: { item.mediaType ?? "" }, set: { item.mediaType = $0; saveChanges() }))
+            TextField("Title", text: Binding(get: { item.title ?? "" }, set: { item.title = $0.isEmpty ? nil : $0 }))
+            TextField("Description", text: Binding(get: { item.descriptionText ?? "" }, set: { item.descriptionText = $0 }))
+            TextField("Media Type", text: Binding(get: { item.mediaType ?? "" }, set: { item.mediaType = $0 }))
             
             HStack {
-                TextField("URL", text: Binding(get: { item.url ?? "" }, set: { item.url = $0.isEmpty ? nil : $0; saveChanges() }))
+                TextField("URL", text: Binding(get: { item.url ?? "" }, set: { item.url = $0.isEmpty ? nil : $0 }))
                 if let urlString = item.url, let url = URL(string: urlString), !urlString.isEmpty {
                     Link(destination: url) {
                         Image(systemName: "link")
@@ -22,11 +22,11 @@ struct ItemDetailView: View {
                 }
             }
             
-            Toggle("Favorite", isOn: Binding(get: { item.favorite }, set: { item.favorite = $0; saveChanges() }))
-            Toggle("Downloading", isOn: Binding(get: { item.isDownloading }, set: { item.isDownloading = $0; saveChanges() }))
-            Toggle("Available on Mac", isOn: Binding(get: { item.isOnMac }, set: { item.isOnMac = $0; saveChanges() }))
-            Toggle("Available on iPhone", isOn: Binding(get: { item.isOnIPhone }, set: { item.isOnIPhone = $0; saveChanges() }))
-            Toggle("In App (e.g. Apple Books)", isOn: Binding(get: { item.isInApp }, set: { item.isInApp = $0; saveChanges() }))
+            Toggle("Favorite", isOn: Binding(get: { item.favorite }, set: { item.favorite = $0 }))
+            Toggle("Downloading", isOn: Binding(get: { item.isDownloading }, set: { item.isDownloading = $0 }))
+            Toggle("Available on Mac", isOn: Binding(get: { item.isOnMac }, set: { item.isOnMac = $0 }))
+            Toggle("Available on iPhone", isOn: Binding(get: { item.isOnIPhone }, set: { item.isOnIPhone = $0 }))
+            Toggle("In App (e.g. Apple Books)", isOn: Binding(get: { item.isInApp }, set: { item.isInApp = $0 }))
         }
         .navigationTitle(item.title ?? "Item Details")
         .onDisappear {
