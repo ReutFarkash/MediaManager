@@ -1,49 +1,70 @@
 import SwiftUI
-import CoreData // Required for Item and viewContext
+import CoreData
 
 struct ItemDetailView: View {
-    @ObservedObject var item: Item // Use @ObservedObject to enable direct editing of item properties
-    @Environment(\.managedObjectContext) private var viewContext // Needed to save changes
-    @Environment(\.undoManager) var undoManager // Optional: for undo/redo functionality
+    @ObservedObject var item: Item
+    @Environment(\.managedObjectContext) private var viewContext
+
+    @State private var title: String
+    @State private var descriptionText: String
+    @State private var mediaType: String
+    @State private var url: String
+    @State private var favorite: Bool
+    @State private var isDownloading: Bool
+    @State private var isOnMac: Bool
+    @State private var isOnIPhone: Bool
+    @State private var isInApp: Bool
+    @State private var coverImageData: Data?
+
+    init(item: Item) {
+        self.item = item
+        _title = State(initialValue: item.title ?? "")
+        _descriptionText = State(initialValue: item.descriptionText ?? "")
+        _mediaType = State(initialValue: item.mediaType ?? "")
+        _url = State(initialValue: item.url ?? "")
+        _favorite = State(initialValue: item.favorite)
+        _isDownloading = State(initialValue: item.isDownloading)
+        _isOnMac = State(initialValue: item.isOnMac)
+        _isOnIPhone = State(initialValue: item.isOnIPhone)
+        _isInApp = State(initialValue: item.isInApp)
+        _coverImageData = State(initialValue: item.coverImage)
+    }
 
     var body: some View {
-        Form {
-            TextField("Title", text: Binding(get: { item.title ?? "" }, set: { item.title = $0.isEmpty ? nil : $0 }))
-            TextField("Description", text: Binding(get: { item.descriptionText ?? "" }, set: { item.descriptionText = $0 }))
-            TextField("Media Type", text: Binding(get: { item.mediaType ?? "" }, set: { item.mediaType = $0 }))
-            
-            HStack {
-                TextField("URL", text: Binding(get: { item.url ?? "" }, set: { item.url = $0.isEmpty ? nil : $0 }))
-                if let urlString = item.url, let url = URL(string: urlString), !urlString.isEmpty {
-                    Link(destination: url) {
-                        Image(systemName: "link")
-                            .accessibilityLabel("Open URL")
-                    }
-                }
-            }
-            
-            Toggle("Favorite", isOn: Binding(get: { item.favorite }, set: { item.favorite = $0 }))
-            Toggle("Downloading", isOn: Binding(get: { item.isDownloading }, set: { item.isDownloading = $0 }))
-            Toggle("Available on Mac", isOn: Binding(get: { item.isOnMac }, set: { item.isOnMac = $0 }))
-            Toggle("Available on iPhone", isOn: Binding(get: { item.isOnIPhone }, set: { item.isOnIPhone = $0 }))
-            Toggle("In App (e.g. Apple Books)", isOn: Binding(get: { item.isInApp }, set: { item.isInApp = $0 }))
-        }
-        .navigationTitle(item.title ?? "Item Details")
-        .onDisappear {
-            // Ensure any pending changes are saved when the view is dismissed
-            saveChanges()
-        }
+        ItemFormView(
+            title: $title,
+            descriptionText: $descriptionText,
+            mediaType: $mediaType,
+            url: $url,
+            favorite: $favorite,
+            isDownloading: $isDownloading,
+            isOnMac: $isOnMac,
+            isOnIPhone: $isOnIPhone,
+            isInApp: $isInApp,
+            coverImageData: $coverImageData
+        )
+        .navigationTitle(title)
+        .onDisappear(perform: saveChanges)
     }
 
     private func saveChanges() {
-        // Only update and save if there are actual changes.
+        item.title = title.isEmpty ? nil : title
+        item.descriptionText = descriptionText
+        item.mediaType = mediaType
+        item.url = url
+        item.favorite = favorite
+        item.isDownloading = isDownloading
+        item.isOnMac = isOnMac
+        item.isOnIPhone = isOnIPhone
+        item.isInApp = isInApp
+        item.coverImage = coverImageData
+
         if viewContext.hasChanges {
             do {
                 try viewContext.save()
             } catch {
                 let nsError = error as NSError
-                print("Error saving changes in ItemDetailView: \(nsError), \(nsError.userInfo)")
-                // You might want to roll back changes or alert the user.
+                print("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
     }

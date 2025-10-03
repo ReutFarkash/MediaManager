@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ItemFormView: View {
     @Binding var title: String
@@ -10,11 +11,24 @@ struct ItemFormView: View {
     @Binding var isOnMac: Bool
     @Binding var isOnIPhone: Bool
     @Binding var isInApp: Bool
-    
+    @Binding var coverImageData: Data?
+
+    @State private var selectedPhoto: PhotosPickerItem?
+
     let availableMediaTypes = ["Book", "Movie", "Song", "Podcast", "Document", "Other"]
 
     var body: some View {
         Form {
+            HStack {
+                if let coverImageData, let nsImage = NSImage(data: coverImageData) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
+                }
+                PhotosPicker("Select cover image", selection: $selectedPhoto, matching: .images)
+            }
+
             TextField("Title", text: $title)
             TextField("Description", text: $descriptionText)
             
@@ -39,6 +53,13 @@ struct ItemFormView: View {
             Toggle("Available on Mac", isOn: $isOnMac)
             Toggle("Available on iPhone", isOn: $isOnIPhone)
             Toggle("In App (e.g. Apple Books)", isOn: $isInApp)
+        }
+        .onChange(of: selectedPhoto) {
+            Task {
+                if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                    coverImageData = data
+                }
+            }
         }
     }
 }

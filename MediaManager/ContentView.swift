@@ -17,17 +17,25 @@ struct ContentView: View {
             List {
                 ForEach(items) { item in
                     NavigationLink(destination: ItemDetailView(item: item)) {
-                        VStack(alignment: .leading) {
-                            Text(item.title ?? "Untitled").font(.headline)
-                            if let desc = item.descriptionText, !desc.isEmpty {
-                                Text(desc).font(.subheadline).foregroundColor(.secondary)
+                        HStack {
+                            if let coverImage = item.coverImage, let nsImage = NSImage(data: coverImage) {
+                                Image(nsImage: nsImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
                             }
-                            HStack {
-                                if item.favorite { Image(systemName: "star.fill").foregroundColor(.yellow) }
-                                if item.isDownloading { Text("Downloading...").font(.caption).foregroundColor(.blue) }
-                                if item.isOnMac { Text("Mac").font(.caption2).foregroundColor(.green) }
-                                if item.isOnIPhone { Text("iPhone").font(.caption2).foregroundColor(.green) }
-                                if item.isInApp { Text("In App").font(.caption2).foregroundColor(.purple) }
+                            VStack(alignment: .leading) {
+                                Text(item.title ?? "Untitled").font(.headline)
+                                if let desc = item.descriptionText, !desc.isEmpty {
+                                    Text(desc).font(.subheadline).foregroundColor(.secondary)
+                                }
+                                HStack {
+                                    if item.favorite { Image(systemName: "star.fill").foregroundColor(.yellow) }
+                                    if item.isDownloading { Text("Downloading...").font(.caption).foregroundColor(.blue) }
+                                    if item.isOnMac { Text("Mac").font(.caption2).foregroundColor(.green) }
+                                    if item.isOnIPhone { Text("iPhone").font(.caption2).foregroundColor(.green) }
+                                    if item.isInApp { Text("In App").font(.caption2).foregroundColor(.purple) }
+                                }
                             }
                         }
                     }
