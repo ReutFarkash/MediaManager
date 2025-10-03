@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4888F56D2E8EDA56007B6218 /* ItemFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4888F56C2E8EDA56007B6218 /* ItemFormView.swift */; };
-		48F752A32E8EC4C1004101D2 /* MediaManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,7 +32,6 @@
 		487F4A002E8D863F0010714F /* MediaManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediaManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		487F4A0A2E8D863F0010714F /* MediaManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediaManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4888F56C2E8EDA56007B6218 /* ItemFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemFormView.swift; sourceTree = "<group>"; };
-		48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -86,7 +84,6 @@
 				487F4A032E8D863F0010714F /* MediaManagerTests */,
 				487F4A0D2E8D863F0010714F /* MediaManagerUITests */,
 				487F49EF2E8D863D0010714F /* Products */,
-				48F752A22E8EC4C1004101D2 /* MediaManagerTests.swift */,
 				4888F56C2E8EDA56007B6218 /* ItemFormView.swift */,
 			);
 			sourceTree = "<group>";
@@ -111,6 +108,7 @@
 				487F49EA2E8D863D0010714F /* Sources */,
 				487F49EB2E8D863D0010714F /* Frameworks */,
 				487F49EC2E8D863D0010714F /* Resources */,
+				48F752A42E8EC4C1004101D3 /* Remove Testing.framework */,
 			);
 			buildRules = (
 			);
@@ -208,13 +206,27 @@
 			productRefGroup = 487F49EF2E8D863D0010714F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (
-				487F49ED2E8D863D0010714F /* MediaManager */,
-				487F49FF2E8D863F0010714F /* MediaManagerTests */,
-				487F4A092E8D863F0010714F /* MediaManagerUITests */,
-			);
-		};
+			            targets = (
+							487F49ED2E8D863D0010714F /* MediaManager */,
+							487F49FF2E8D863F0010714F /* MediaManagerTests */,
+						);		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		48F752A42E8EC4C1004101D3 /* Remove Testing.framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "rm -rf \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Testing.framework\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		487F49EC2E8D863D0010714F /* Resources */ = {
@@ -246,7 +258,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4888F56D2E8EDA56007B6218 /* ItemFormView.swift in Sources */,
-				48F752A32E8EC4C1004101D2 /* MediaManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48F752A32E8EC4C1004101D2 /* MediaManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,6 +441,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 			};
 			name = Debug;
 		};
