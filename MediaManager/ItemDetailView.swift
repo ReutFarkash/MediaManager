@@ -37,28 +37,6 @@ struct ItemDetailView: View {
 
     private func saveChanges() {
         // Only update and save if there are actual changes.
-        guard item.title != title ||
-              item.descriptionText != descriptionText ||
-              item.mediaType != mediaType ||
-              item.url != (url.isEmpty ? nil : url) ||
-              item.favorite != favorite ||
-              item.isDownloading != isDownloading ||
-              item.isOnMac != isOnMac ||
-              item.isOnIPhone != isOnIPhone ||
-              item.isInApp != isInApp else {
-            return
-        }
-
-        item.title = title
-        item.descriptionText = descriptionText
-        item.mediaType = mediaType
-        item.url = url.isEmpty ? nil : url
-        item.favorite = favorite
-        item.isDownloading = isDownloading
-        item.isOnMac = isOnMac
-        item.isOnIPhone = isOnIPhone
-        item.isInApp = isInApp
-
         if viewContext.hasChanges {
             do {
                 try viewContext.save()
