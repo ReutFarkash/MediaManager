@@ -37,9 +37,8 @@ class BooksImporter {
             } catch {
                 print("Failed to run AppleScript process: \(error.localizedDescription)")
                 // Also print stderr if available for more context
-                if let errorData = pipe.fileHandleForReading.readDataToEndOfFile(),
-                   let errorOutput = String(data: errorData, encoding: .utf8),
-                   !errorOutput.isEmpty {
+                let errorData = pipe.fileHandleForReading.readDataToEndOfFile()
+                if !errorData.isEmpty, let errorOutput = String(data: errorData, encoding: .utf8) {
                     print("AppleScript stderr: \(errorOutput)")
                 }
                 return []
@@ -50,11 +49,12 @@ class BooksImporter {
                 print("Failed to decode AppleScript output to String.")
                 return []
             }
-            return parseBooks(from: output)
+            return await parseBooks(from: output)
         }.value
     }
 
-    private static func parseBooks(from output: String) -> [BookInfo] {
+    @MainActor
+    static func parseBooks(from output: String) -> [BookInfo] {
         output.split(separator: ";;").compactMap { entry in
             let fields = entry.split(separator: "||", omittingEmptySubsequences: false)
             guard fields.count == 2 else {
