@@ -130,19 +130,19 @@ struct CoreDataTests {
         #expect(fetchedItems.first?.favorite == true)
     }
     
-    @Test("Add item with empty URL should store nil")
+    @Test("Add item with empty URL should store an empty string")
     func testAddItemWithEmptyURL() async throws {
         let testStack = try await AsyncCoreDataTestStack()
         let context = testStack.viewContext
         
         let newItem = Item(context: context)
         newItem.title = "Item with No URL"
-        newItem.url = "" // This should be treated as nil by the setter
+        newItem.url = ""
         newItem.timestamp = Date()
         try context.save()
         
         let fetchedItem = try #require(context.fetch(Item.fetchRequest()).first)
-        #expect(fetchedItem.url == nil)
+        #expect(fetchedItem.url == "")
     }
 }
 
